@@ -1,8 +1,9 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
+    <!-- 复制一份tabcontrol，在滑动到一定位置时，该标签才显示代替原来的标签 -->
     <tab-control class="tab-control" :titles="['流行','经典','精选']"
-                   @tabClick="tabClick" ref="tabControl"
+                   @tabClick="tabClick" ref="TopTabControl"
                    v-show="isFixed"/>
     <scroll class="content" ref="scroll" 
             :probe-type="3" :pull-up-load="true" 
@@ -23,9 +24,9 @@ import NavBar from 'components/common/navbar/NavBar'
 import TabControl from 'components/content/tabcontrol/TabControl'
 import GoodsList from 'components/content/goods/GoodsList'
 import Scroll from 'components/common/scroll/Scroll'
-import BackTop from 'components/common/backtop/BackTop'
 
 import { getHomeMultidata, getHomeGoods } from 'network/home'
+import { imgListener, backTopListener } from 'common/mixin'
 
 import HomeSwiper from './childComps/HomeSwiper'
 import HomeRecommendView from './childComps/HomeRecommendView'
@@ -37,7 +38,6 @@ export default {
     TabControl,
     GoodsList,
     Scroll,
-    BackTop,
     HomeSwiper,
     HomeRecommendView,
     HomeFeatureView
@@ -52,24 +52,27 @@ export default {
         'sell': {page: 0, list: []},
       },
       currentType: 'pop',
-      isShow: false,
       tabOffsetTop: 0,
-      isFixed: false
+      isFixed: false,
+      saveY: 0
     }
   },
+  mixins: [imgListener,backTopListener],
   created(){
     this.getHomeMultidata()
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
     this.getHomeGoods('sell')
-
   },
   mounted() {
-    //图片加载完成方法
-    const refresh = this.debounce(this.$refs.scroll.refresh)
-    this.$bus.$on('itemImgLoad', () => {
-      refresh()
-    })
+  },
+  actived(){
+    this.$refs.scroll.scrollTo(0,this.saveY,0)
+    this.$refs.scroll.refresh()
+  },
+  deactived(){
+    this.saveY = this.$refs.scroll.getScrollY()
+    this.$bus.$off('itemImageLoad',this.imgListener)
   },
   methods: {
     //网络请求方法
@@ -101,10 +104,9 @@ export default {
           this.currentType = 'sell'
           break
       }
+      this.$refs.TopTabControl.actNum = index
+      this.$refs.tabControl.actNum = index
 
-    },
-    backClick(){
-      this.$refs.scroll.scrollTo(0,0)
     },
     scrollContent(position){
       this.isShow = (-position.y) > 1000;
@@ -138,6 +140,7 @@ export default {
   .home-nav{
     background-color: var(--color-tint);
     color: white;
+    /* 因为导航标签不在滚动标签内部，所以不用设置以下样式 */
     /* position: fixed;
     left: 0;
     right: 0;
@@ -145,7 +148,9 @@ export default {
     z-index: 9; */
   }
   .content{
+    /* 一定加overflow */
     overflow: hidden;
+    /* 一定加overflow */
     position: absolute;
     top: 44px;
     bottom: 49px;

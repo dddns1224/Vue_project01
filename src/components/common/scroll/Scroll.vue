@@ -22,7 +22,7 @@ export default {
       },
       pullUpLoad: {
           type: Boolean,
-          default: false
+          default: true
       }
   },
   mounted(){
@@ -52,6 +52,9 @@ export default {
       },
       finishPullUp(){
           this.scroll.finishPullUp()
+      },
+      getScrollY(){
+          return this.scroll ? this.scroll.y : 0
       }
   }
 }
