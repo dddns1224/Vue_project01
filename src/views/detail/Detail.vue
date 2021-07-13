@@ -155,11 +155,11 @@ export default {
       product.image = this.topImages[0]
       product.title = this.goods.title
       product.desc = this.goods.desc
-      product.desc = this.goods.realPrice
+      product.price = this.goods.realPrice
       product.iid = this.iid
       //2.将商品添加到购物车里面
       this.$store.dispatch('addCart',product)
-
+      console.log(this.product);
 
     }
   }

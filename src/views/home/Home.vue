@@ -57,7 +57,7 @@ export default {
       saveY: 0
     }
   },
-  mixins: [imgListener,backTopListener],
+  mixins: [ imgListener,backTopListener ],
   created(){
     this.getHomeMultidata()
     this.getHomeGoods('pop')
